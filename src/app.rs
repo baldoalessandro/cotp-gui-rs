@@ -1,77 +1,39 @@
-use leptos::leptos_dom::ev::SubmitEvent;
+use leptonic::prelude::*;
 use leptos::*;
-use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::prelude::*;
+use leptos_meta::{provide_meta_context, Meta, Stylesheet, Title};
+use leptos_router::*;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
-
-#[derive(Serialize, Deserialize)]
-struct GreetArgs<'a> {
-    name: &'a str,
-}
+use crate::{
+    error_template::{AppError, ErrorTemplate},
+    pages::welcome::Welcome,
+};
 
 #[component]
 pub fn App() -> impl IntoView {
-    let (name, set_name) = create_signal(String::new());
-    let (greet_msg, set_greet_msg) = create_signal(String::new());
-
-    let update_name = move |ev| {
-        let v = event_target_value(&ev);
-        set_name.set(v);
-    };
-
-    let greet = move |ev: SubmitEvent| {
-        ev.prevent_default();
-        spawn_local(async move {
-            let name = name.get_untracked();
-            if name.is_empty() {
-                return;
-            }
-
-            let args = to_value(&GreetArgs { name: &name }).unwrap();
-            // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-            let new_msg = invoke("greet", args).await.as_string().unwrap();
-            set_greet_msg.set(new_msg);
-        });
-    };
+    provide_meta_context();
 
     view! {
-        <main class="container">
-            <div class="row">
-                <a href="https://tauri.app" target="_blank">
-                    <img src="public/tauri.svg" class="logo tauri" alt="Tauri logo"/>
-                </a>
-                <a href="https://docs.rs/leptos/" target="_blank">
-                    <img src="public/leptos.svg" class="logo leptos" alt="Leptos logo"/>
-                </a>
-            </div>
+        <Meta name="charset" content="UTF-8"/>
+        <Meta name="description" content="Leptonic CSR template"/>
+        <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <Meta name="theme-color" content="#e66956"/>
 
-            <p>"Click on the Tauri and Leptos logos to learn more."</p>
+        <Stylesheet href="https://fonts.googleapis.com/css?family=Roboto&display=swap"/>
 
-            <p>
-                "Recommended IDE setup: "
-                <a href="https://code.visualstudio.com/" target="_blank">"VS Code"</a>
-                " + "
-                <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank">"Tauri"</a>
-                " + "
-                <a href="https://github.com/rust-lang/rust-analyzer" target="_blank">"rust-analyzer"</a>
-            </p>
+        <Title text="Leptonic CSR template"/>
 
-            <form class="row" on:submit=greet>
-                <input
-                    id="greet-input"
-                    placeholder="Enter a name..."
-                    on:input=update_name
-                />
-                <button type="submit">"Greet"</button>
-            </form>
-
-            <p><b>{ move || greet_msg.get() }</b></p>
-        </main>
+        <Root default_theme=LeptonicTheme::default()>
+            <Router fallback=|| {
+                let mut outside_errors = Errors::default();
+                outside_errors.insert_with_default_key(AppError::NotFound);
+                view! {
+                    <ErrorTemplate outside_errors/>
+                }
+            }>
+                <Routes>
+                    <Route path="" view=|| view! { <Welcome/> }/>
+                </Routes>
+            </Router>
+        </Root>
     }
 }
