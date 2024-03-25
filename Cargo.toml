@@ -43,4 +43,4 @@ style-dir = "style"
 js-dir = "public/js"
 
 [workspace]
-members = ["src-tauri"]
+members = ["src-tauri", "cotp"]

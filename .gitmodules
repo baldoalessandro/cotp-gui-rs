@@ -1,0 +1,3 @@
+[submodule "cotp"]
+	path = cotp
+	url = git@github.com:baldoalessandro/cotp.git
