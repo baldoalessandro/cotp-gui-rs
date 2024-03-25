@@ -3,7 +3,7 @@ use leptos::*;
 
 mod app;
 mod error_template;
-mod pages;
+mod screens;
 
 
 fn main() {
