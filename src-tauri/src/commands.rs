@@ -3,7 +3,6 @@ use tauri::State;
 
 use crate::state::AppState;
 
-
 // TODO We should return a more detailed error back to the frontend :)
 #[tauri::command]
 pub fn unlock_db(password: &str, state: State<AppState>) -> bool {
@@ -14,10 +13,26 @@ pub fn unlock_db(password: &str, state: State<AppState>) -> bool {
             *state.key.lock().unwrap() = Some(key);
             *state.salt.lock().unwrap() = Some(salt);
             return true;
-        },
+        }
         Err(e) => {
             println!("{e}");
             return false;
         }
     }
+}
+
+#[tauri::command]
+pub fn list_otps(state: State<AppState>) -> Vec<String> {
+    let result = {
+        let db = state.database.lock().unwrap();
+        if let Some(db) = db.as_ref() {
+            db.elements_ref()
+                .iter()
+                .map(|otp| otp.label.to_owned())
+                .collect()
+        } else {
+            return vec![];
+        }
+    };
+    result
 }

@@ -5,6 +5,7 @@ use leptos_router::*;
 
 use crate::{
     error_template::{AppError, ErrorTemplate},
+    screens::db::DB,
     screens::home::Home,
 };
 
@@ -32,7 +33,7 @@ pub fn App() -> impl IntoView {
                 }>
                     <Routes>
                         <Route path="" view=|| view! { <Home/> }/>
-
+                        <Route path="/db" view=DB/>
                     </Routes>
                 </Router>
             </Box>
