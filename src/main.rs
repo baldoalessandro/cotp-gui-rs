@@ -2,6 +2,7 @@ use app::*;
 use leptos::*;
 
 mod app;
+mod tauri;
 mod error_template;
 mod screens;
 

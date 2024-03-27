@@ -1,17 +1,12 @@
 use leptonic::prelude::*;
 use leptos::*;
-use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
-use wasm_bindgen::prelude::*;
+use serde::Serialize;
+use serde_wasm_bindgen::{from_value, to_value};
 use web_sys::MouseEvent;
 
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "core"])]
-    async fn invoke(cmd: &str, args: JsValue) -> JsValue;
-}
+use crate::tauri::invoke;
 
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize)]
 struct UnlockDBArgs<'a> {
     password: &'a str,
 }
@@ -34,7 +29,8 @@ pub fn Home() -> impl IntoView {
                 password: &password,
             })
             .unwrap();
-            match invoke("unlock_db", args).await.as_bool().unwrap() {
+            let res = invoke("unlock_db", args).await;
+            match from_value(res).unwrap() {
                 true => {
                     let navigate = leptos_router::use_navigate();
                     navigate("/db", Default::default());
